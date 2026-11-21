@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coach Squad & Position Selector</title>
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & HIGH-CONTRAST WARM COMMUNITY CLUB PALETTE
+       ========================================================================== */
+    :root {
+      --bg-page: #f5f4ef;
+      --bg-card: #ffffff;
+      --bg-subtle: #ebe9e0;
+      --bg-header: #183d2c;
+      --bg-header-dark: #112c20;
+
+      --text-primary: #1a201d;
+      --text-secondary: #434d47;
+      --text-inverse: #ffffff;
+
+      --brand-green: #183d2c;
+      --brand-green-hover: #23573f;
+      --brand-green-light: #e4efe9;
+      --brand-green-border: #183d2c;
+
+      --brand-amber: #b45309;
+      --brand-amber-bg: #fef3c7;
+      --brand-amber-accent: #d97706;
+      --brand-amber-border: #92400e;
+
+      --team-b-blue: #1e40af;
+      --team-b-bg: #dbeafe;
+      --team-b-border: #1e3a8a;
+
+      --danger-red: #991b1b;
+      --danger-bg: #fee2e2;
+      --danger-border: #7f1d1d;
+
+      --border-light: #d1cfc4;
+      --border-strong: #8c8a7e;
+      --focus-ring: #d97706;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(24, 61, 44, 0.08);
+      --shadow-md: 0 4px 12px rgba(24, 61, 44, 0.12);
+      --shadow-sticky: 0 -4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ==========================================================================
+       RESET & BASE TYPOGRAPHY (Minimum 16px Body Text)
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 130px; /* Room for sticky bottom action bar */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Accessible Focus Ring for Keyboard Navigation */
+    :focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================================================
+       HEADER & SUMMARY COUNTERS
+       ========================================================================== */
+    .club-header {
+      background-color: var(--bg-header);
+      color: var(--text-inverse);
+      padding: 1.5rem 1rem 1.75rem;
+      border-bottom: 4px solid var(--brand-amber-accent);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .header-top {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    @media (min-width: 720px) {
+      .header-top {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+    }
+
+    .club-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background-color: rgba(255, 255, 255, 0.14);
+      color: #fde68a;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.65rem;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    @media (min-width: 640px) {
+      h1 {
+        font-size: 2rem;
+      }
+    }
+
+    .header-subtitle {
+      margin: 0.4rem 0 0;
+      color: #d8e5de;
+      font-size: 1rem;
+    }
+
+    /* Coach Name Input Group */
+    .coach-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 260px;
+    }
+
+    .coach-input-group label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .coach-input {
+      min-height: 48px;
+      padding: 0.65rem 0.9rem;
+      font-size: 1rem;
+      color: var(--text-primary);
+      background-color: #ffffff;
+      border: 2px solid #d1cfc4;
+      border-radius: var(--radius-sm);
+      width: 100%;
+    }
+
+    .coach-input::placeholder {
+      color: #6b7280;
+    }
+
+    /* Live Counters Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+      margin-top: 1.35rem;
+    }
+
+    @media (min-width: 640px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.85rem;
+      }
+    }
+
+    .stat-box {
+      background-color: var(--bg-header-dark);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #cbd5d0;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+      margin-top: 0.15rem;
+    }
+
+    .stat-box.stat-amber .stat-value {
+      color: #fcd34d;
+    }
+
+    /* ==========================================================================
+       FILTER & SEARCH CONTROLS
+       ========================================================================== */
+    .controls-section {
+      padding: 1.25rem 1rem 0.5rem;
+    }
+
+    .controls-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      min-height: 48px;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-strong);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      flex: 1 1 auto;
+    }
+
+    @media (min-width: 640px) {
+      .filter-btn {
+        flex: 0 1 auto;
+      }
+    }
+
+    .filter-btn:hover {
+      background-color: var(--bg-subtle);
+    }
+
+    .filter-btn[aria-pressed="true"] {
+      background-color: var(--brand-green);
+      border-color: var(--brand-green);
+      color: var(--text-inverse);
+    }
+
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-input {
+      min-height: 48px;
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      font-size: 1rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background-color: #ffffff;
+      color: var(--text-primary);
+    }
+
+    .autosave-note {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-top: 0.25rem;
+    }
+
+    /* ==========================================================================
+       PLAYER ROSTER CARDS
+       ========================================================================== */
+    .roster-section {
+      padding: 0.75rem 1rem 2rem;
+    }
+
+    .roster-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .player-card {
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-left: 6px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+
+    /* Non-color-dependent visual accents reinforced by border thickness & badges */
+    .player-card.assigned-team-a {
+      border-left-color: var(--brand-green);
+      border-color: #9ec5b0;
+      border-left-width: 8px;
+    }
+
+    .player-card.assigned-team-b {
+      border-left-color: var(--team-b-blue);
+      border-color: #93c5fd;
+      border-left-width: 8px;
+    }
+
+    .player-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--bg-subtle);
+      margin-bottom: 0.85rem;
+    }
+
+    .player-identity {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .player-number {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      min-width: 1.75rem;
+    }
+
+    .player-name {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    /* Status Badge - Explicitly readable text + icon indicator (non-color dependent) */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: 2px solid var(--border-strong);
+      background-color: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .status-badge.badge-team-a {
+      background-color: var(--brand-green-light);
+      border-color: var(--brand-green-border);
+      color: var(--brand-green);
+    }
+
+    .status-badge.badge-team-b {
+      background-color: var(--team-b-bg);
+      border-color: var(--team-b-border);
+      color: var(--team-b-blue);
+    }
+
+    .status-badge.badge-partial {
+      background-color: var(--brand-amber-bg);
+      border-color: var(--brand-amber-border);
+      color: #78350f;
+    }
+
+    /* Control Groups inside Player Card */
+    .selector-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    @media (min-width: 820px) {
+      .selector-rows {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .group-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-secondary);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    /* Large Touch Targets (>= 48x48px) */
+    .choice-btn {
+      min-height: 48px;
+      min-width: 48px;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-strong);
+      background-color: #ffffff;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.06s ease, background-color 0.12s ease;
+    }
+
+    .choice-btn:active {
+      transform: scale(0.98);
+    }
+
+    .choice-btn:hover {
+      background-color: var(--bg-subtle);
+    }
+
+    /* Selected Team A */
+    .choice-btn[data-team="Team A"][aria-pressed="true"] {
+      background-color: var(--brand-green);
+      border-color: var(--brand-green);
+      color: #ffffff;
+    }
+
+    /* Selected Team B */
+    .choice-btn[data-team="Team B"][aria-pressed="true"] {
+      background-color: var(--team-b-blue);
+      border-color: var(--team-b-blue);
+      color: #ffffff;
+    }
+
+    /* Clear button */
+    .choice-btn.btn-clear {
+      border-style: dashed;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .choice-btn.btn-clear:hover {
+      background-color: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-red);
+      border-style: solid;
+    }
+
+    /* Selected Position */
+    .choice-btn[data-pos][aria-pressed="true"] {
+      background-color: #92400e;
+      border-color: #78350f;
+      color: #ffffff;
+    }
+
+    /* Empty Filter State */
+    .empty-state {
+      background-color: var(--bg-card);
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state h2 {
+      margin: 0 0 0.5rem;
+      color: var(--text-primary);
+      font-size: 1.25rem;
+    }
+
+    /* ==========================================================================
+       STICKY BOTTOM ACTION BAR
+       ========================================================================== */
+    .sticky-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-card);
+      border-top: 2px solid var(--border-strong);
+      box-shadow: var(--shadow-sticky);
+      padding: 0.75rem 1rem;
+      z-index: 50;
+    }
+
+    .footer-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 680px) {
+      .footer-actions {
+        grid-template-columns: 2fr 1.3fr auto;
+        gap: 0.75rem;
+      }
+    }
+
+    .action-btn {
+      min-height: 50px;
+      padding: 0.65rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border-radius: var(--radius-sm);
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .btn-primary-copy {
+      background-color: var(--brand-green);
+      color: #ffffff;
+      border-color: var(--brand-green);
+    }
+
+    .btn-primary-copy:hover {
+      background-color: var(--brand-green-hover);
+    }
+
+    .btn-secondary-csv {
+      background-color: var(--brand-amber-bg);
+      color: #78350f;
+      border-color: var(--brand-amber-border);
+    }
+
+    .btn-secondary-csv:hover {
+      background-color: #fde68a;
+    }
+
+    .btn-danger-reset {
+      background-color: #ffffff;
+      color: var(--danger-red);
+      border-color: var(--danger-border);
+    }
+
+    .btn-danger-reset:hover {
+      background-color: var(--danger-bg);
+    }
+
+    /* Mobile compact sticky footer */
+    @media (max-width: 679px) {
+      body {
+        padding-bottom: 185px;
+      }
+      .footer-sub-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+      }
+    }
+
+    @media (min-width: 680px) {
+      .footer-sub-row {
+        display: contents;
+      }
+    }
+
+    /* ==========================================================================
+       ACCESSIBLE TOAST NOTIFICATION & CUSTOM MODAL DIALOG (No alert/confirm)
+       ========================================================================== */
+    .toast {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-140%);
+      background-color: #112c20;
+      color: #ffffff;
+      border: 2px solid #fcd34d;
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: var(--shadow-md);
+      z-index: 100;
+      max-width: 92vw;
+      text-align: center;
+      transition: transform 0.25s ease;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Custom Accessible Confirmation Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 44, 32, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 200;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      max-width: 460px;
+      width: 100%;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .modal-dialog h2 {
+      margin: 0 0 0.65rem;
+      font-size: 1.35rem;
+      color: var(--text-primary);
+    }
+
+    .modal-dialog p {
+      margin: 0 0 1.35rem;
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Reader & Visual Toast Live Region -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Header Section -->
+  <header class="club-header">
+    <div class="container">
+      <div class="header-top">
+        <div>
+          <div class="club-badge" aria-hidden="true">⚽ Club Selection Tool</div>
+          <h1>Coach Squad &amp; Position Selector</h1>
+          <p class="header-subtitle">Assign each player to Team A or Team B and pick their best position.</p>
+        </div>
+
+        <div class="coach-input-group">
+          <label for="coach-name">Your Coach Name (Optional)</label>
+          <input
+            type="text"
+            id="coach-name"
+            class="coach-input"
+            placeholder="e.g. Coach Sarah"
+            autocomplete="name"
+          />
+        </div>
+      </div>
+
+      <!-- Live Squad Counters -->
+      <section aria-label="Squad assignment summary" class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-label">Total Roster</span>
+          <span class="stat-value" id="stat-total">50</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Team A</span>
+          <span class="stat-value" id="stat-team-a">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Team B</span>
+          <span class="stat-value" id="stat-team-b">0</span>
+        </div>
+        <div class="stat-box stat-amber">
+          <span class="stat-label">Unassigned</span>
+          <span class="stat-value" id="stat-unassigned">50</span>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Filter & Search Controls -->
+    <section class="controls-section" aria-label="Filter and search players">
+      <div class="controls-card">
+        <div class="filter-row" role="group" aria-label="Filter players by team status">
+          <button type="button" class="filter-btn" data-filter="all" aria-pressed="true">
+            All Players (<span id="filter-count-all">50</span>)
+          </button>
+          <button type="button" class="filter-btn" data-filter="unassigned" aria-pressed="false">
+            Unassigned (<span id="filter-count-unassigned">50</span>)
+          </button>
+          <button type="button" class="filter-btn" data-filter="Team A" aria-pressed="false">
+            Team A (<span id="filter-count-a">0</span>)
+          </button>
+          <button type="button" class="filter-btn" data-filter="Team B" aria-pressed="false">
+            Team B (<span id="filter-count-b">0</span>)
+          </button>
+        </div>
+
+        <div class="search-row">
+          <label for="player-search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">Search player by name</label>
+          <input
+            type="search"
+            id="player-search"
+            class="search-input"
+            placeholder="Quick find player by name..."
+            aria-label="Quick find player by name"
+          />
+        </div>
+
+        <div class="autosave-note">
+          <span>✓ Progress auto-saves automatically on this phone/browser.</span>
+          <span id="visible-count-label">Showing 50 of 50 players</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Player List -->
+    <section class="roster-section" aria-label="Player roster">
+      <ul id="roster-list" class="roster-list"></ul>
+      <div id="empty-state" class="empty-state" hidden>
+        <h2>No players match this filter</h2>
+        <p>Try switching back to "All Players" or clearing your search box.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Bottom Action Bar -->
+  <footer class="sticky-footer" aria-label="Export and reset actions">
+    <div class="container">
+      <div class="footer-actions">
+        <button type="button" id="btn-copy-summary" class="action-btn btn-primary-copy">
+          📋 Copy Summary for WhatsApp / Email
+        </button>
+        <div class="footer-sub-row">
+          <button type="button" id="btn-download-csv" class="action-btn btn-secondary-csv">
+            ⬇️ Download CSV
+          </button>
+          <button type="button" id="btn-reset-all" class="action-btn btn-danger-reset">
+            Reset All
+          </button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Accessible Confirmation Modal for Reset All -->
+  <div id="reset-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" aria-describedby="reset-modal-desc">
+    <div class="modal-dialog">
+      <h2 id="reset-modal-title">Reset all squad selections?</h2>
+      <p id="reset-modal-desc">
+        This will clear all Team A, Team B, and position choices for all 50 players on this device. This action cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button type="button" id="btn-cancel-reset" class="choice-btn">Cancel</button>
+        <button type="button" id="btn-confirm-reset" class="action-btn btn-danger-reset" style="background-color:#991b1b;color:#ffffff;">
+          Yes, Reset Everything
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden textarea fallback for reliable clipboard copy in all environments -->
+  <textarea id="clipboard-fallback" aria-hidden="true" tabindex="-1" style="position:fixed;left:-9999px;top:0;"></textarea>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ========================================================================
+         1. MASTER ROSTER DATA (Exact 50 Players in Roster Order)
+         ======================================================================== */
+      const PLAYERS = [
+        "Aibhlínn D Heaney",
+        "Ali Breen Meredith",
+        "Amalia Ciuti",
+        "Amelia Breen",
+        "Amelia Gibbs",
+        "Amelia Whyte",
+        "Anna Glynn",
+        "Anna Rose Milne",
+        "Aoife Higgins",
+        "Aoife Plunkett",
+        "Ava Smyth",
+        "Bláthnaid Smith",
+        "Cara Kenny",
+        "Carrie Molloy",
+        "Chloe Duggan",
+        "Cliona Skelton",
+        "Dearbhla McMahon",
+        "Elena Simeoni",
+        "Ellen Dwyer",
+        "Emma Foody",
+        "Faye O'Connor",
+        "Hannah Clare",
+        "Hannah Rose Wardle",
+        "Hayley Howard",
+        "Holly Coyle",
+        "Imogen McGuckin",
+        "Isabelle Mullane",
+        "Isabelle Nolan",
+        "Jessica Joyce",
+        "Kate Mc Kenna",
+        "Kate Wang",
+        "Keeva Doran",
+        "Lauren McGrath",
+        "Lauren Reaper",
+        "Leah Smyth",
+        "Leila Stokes",
+        "Lexi Dowling",
+        "Milarose Moloney",
+        "Millie Cooney",
+        "Mollie Doolin",
+        "Myra Anand",
+        "Rachel Hyland",
+        "Saoirse Bowman",
+        "Saoirse Howard",
+        "Sarah Murphy",
+        "Sinead Kavanagh",
+        "Sofia Mahon",
+        "Stella Laher",
+        "Zoe Casey",
+        "Zoe Whelan"
+      ];
+
+      const POSITIONS = ["Goalkeeper", "Backs", "Midfield", "Forward"];
+      const STORAGE_KEY = "coach_squad_selector_v1";
+
+      /* ========================================================================
+         2. APPLICATION STATE & LOCALSTORAGE PERSISTENCE
+         ======================================================================== */
+      let state = {
+        coachName: "",
+        assignments: {}, // { [playerIndex]: { team: "Team A" | "Team B" | "", position: "..." } }
+        filter: "all",
+        search: ""
+      };
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            state.coachName = typeof parsed.coachName === "string" ? parsed.coachName : "";
+            state.assignments = parsed.assignments && typeof parsed.assignments === "object" ? parsed.assignments : {};
+          }
+        } catch (err) {
+          console.warn("Could not read saved progress from localStorage:", err);
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            coachName: state.coachName,
+            assignments: state.assignments
+          }));
+        } catch (err) {
+          console.warn("Could not save progress to localStorage:", err);
+        }
+      }
+
+      function getPlayerAssignment(index) {
+        return state.assignments[index] || { team: "", position: "" };
+      }
+
+      /* ========================================================================
+         3. DOM REFERENCES
+         ======================================================================== */
+      const coachNameInput = document.getElementById("coach-name");
+      const searchInput = document.getElementById("player-search");
+      const rosterListEl = document.getElementById("roster-list");
+      const emptyStateEl = document.getElementById("empty-state");
+      const visibleCountLabel = document.getElementById("visible-count-label");
+
+      const statTotalEl = document.getElementById("stat-total");
+      const statTeamAEl = document.getElementById("stat-team-a");
+      const statTeamBEl = document.getElementById("stat-team-b");
+      const statUnassignedEl = document.getElementById("stat-unassigned");
+
+      const filterCountAll = document.getElementById("filter-count-all");
+      const filterCountUnassigned = document.getElementById("filter-count-unassigned");
+      const filterCountA = document.getElementById("filter-count-a");
+      const filterCountB = document.getElementById("filter-count-b");
+
+      const filterButtons = Array.from(document.querySelectorAll(".filter-btn"));
+      const toastEl = document.getElementById("toast");
+      const resetModal = document.getElementById("reset-modal");
+      const btnCancelReset = document.getElementById("btn-cancel-reset");
+      const btnConfirmReset = document.getElementById("btn-confirm-reset");
+
+      let toastTimer = null;
+
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.classList.add("visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastEl.classList.remove("visible");
+        }, 3200);
+      }
+
+      /* ========================================================================
+         4. RENDERING & UI UPDATES
+         ======================================================================== */
+      function formatStatusBadge(assignment) {
+        const hasTeam = Boolean(assignment.team);
+        const hasPos = Boolean(assignment.position);
+
+        if (!hasTeam && !hasPos) {
+          return {
+            text: "○ Unassigned",
+            className: "status-badge"
+          };
+        }
+
+        if (hasTeam && hasPos) {
+          return {
+            text: `✓ ${assignment.team} • ${assignment.position}`,
+            className: assignment.team === "Team A" ? "status-badge badge-team-a" : "status-badge badge-team-b"
+          };
+        }
+
+        if (hasTeam && !hasPos) {
+          return {
+            text: `◐ ${assignment.team} • No Position`,
+            className: assignment.team === "Team A" ? "status-badge badge-team-a" : "status-badge badge-team-b"
+          };
+        }
+
+        // Position picked without Team yet
+        return {
+          text: `◐ No Team • ${assignment.position}`,
+          className: "status-badge badge-partial"
+        };
+      }
+
+      function updateCounters() {
+        let teamACount = 0;
+        let teamBCount = 0;
+        let unassignedCount = 0;
+
+        PLAYERS.forEach((_, idx) => {
+          const { team } = getPlayerAssignment(idx);
+          if (team === "Team A") {
+            teamACount++;
+          } else if (team === "Team B") {
+            teamBCount++;
+          } else {
+            unassignedCount++;
+          }
+        });
+
+        statTotalEl.textContent = PLAYERS.length;
+        statTeamAEl.textContent = teamACount;
+        statTeamBEl.textContent = teamBCount;
+        statUnassignedEl.textContent = unassignedCount;
+
+        filterCountAll.textContent = PLAYERS.length;
+        filterCountUnassigned.textContent = unassignedCount;
+        filterCountA.textContent = teamACount;
+        filterCountB.textContent = teamBCount;
+      }
+
+      function matchesCurrentFilter(index) {
+        const assignment = getPlayerAssignment(index);
+        const name = PLAYERS[index].toLowerCase();
+        const query = state.search.trim().toLowerCase();
+
+        if (query && !name.includes(query)) {
+          return false;
+        }
+
+        if (state.filter === "unassigned") {
+          return assignment.team === "";
+        }
+        if (state.filter === "Team A") {
+          return assignment.team === "Team A";
+        }
+        if (state.filter === "Team B") {
+          return assignment.team === "Team B";
+        }
+        return true;
+      }
+
+      function buildRosterDOM() {
+        const fragment = document.createDocumentFragment();
+
+        PLAYERS.forEach((playerName, idx) => {
+          const li = document.createElement("li");
+          li.className = "player-card";
+          li.dataset.index = String(idx);
+
+          const headingId = `player-name-${idx}`;
+          li.setAttribute("aria-labelledby", headingId);
+
+          li.innerHTML = `
+            <div class="player-header">
+              <div class="player-identity">
+                <span class="player-number">${idx + 1}.</span>
+                <h2 id="${headingId}" class="player-name">${escapeHtml(playerName)}</h2>
+              </div>
+              <span class="status-badge" data-role="badge">○ Unassigned</span>
+            </div>
+
+            <div class="selector-rows">
+              <div class="control-group">
+                <span class="group-label" id="team-label-${idx}">Squad</span>
+                <div class="btn-group" role="group" aria-labelledby="team-label-${idx}">
+                  <button type="button" class="choice-btn" data-action="team" data-team="Team A" aria-pressed="false" aria-label="Assign ${escapeHtml(playerName)} to Team A">
+                    Team A
+                  </button>
+                  <button type="button" class="choice-btn" data-action="team" data-team="Team B" aria-pressed="false" aria-label="Assign ${escapeHtml(playerName)} to Team B">
+                    Team B
+                  </button>
+                  <button type="button" class="choice-btn btn-clear" data-action="clear" aria-label="Clear team and position for ${escapeHtml(playerName)}">
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <span class="group-label" id="pos-label-${idx}">Position</span>
+                <div class="btn-group" role="group" aria-labelledby="pos-label-${idx}">
+                  ${POSITIONS.map(pos => `
+                    <button type="button" class="choice-btn" data-action="position" data-pos="${pos}" aria-pressed="false" aria-label="Set position ${pos} for ${escapeHtml(playerName)}">
+                      ${pos}
+                    </button>
+                  `).join("")}
+                </div>
+              </div>
+            </div>
+          `;
+
+          fragment.appendChild(li);
+        });
+
+        rosterListEl.appendChild(fragment);
+      }
+
+      function syncCardUI(idx) {
+        const card = rosterListEl.querySelector(`.player-card[data-index="${idx}"]`);
+        if (!card) return;
+
+        const assignment = getPlayerAssignment(idx);
+
+        // Card border styling
+        card.classList.remove("assigned-team-a", "assigned-team-b");
+        if (assignment.team === "Team A") {
+          card.classList.add("assigned-team-a");
+        } else if (assignment.team === "Team B") {
+          card.classList.add("assigned-team-b");
+        }
+
+        // Status badge
+        const badgeEl = card.querySelector('[data-role="badge"]');
+        const badgeInfo = formatStatusBadge(assignment);
+        badgeEl.className = badgeInfo.className;
+        badgeEl.textContent = badgeInfo.text;
+
+        // Team buttons
+        card.querySelectorAll('[data-action="team"]').forEach(btn => {
+          const isSelected = btn.dataset.team === assignment.team;
+          btn.setAttribute("aria-pressed", isSelected ? "true" : "false");
+        });
+
+        // Position buttons
+        card.querySelectorAll('[data-action="position"]').forEach(btn => {
+          const isSelected = btn.dataset.pos === assignment.position;
+          btn.setAttribute("aria-pressed", isSelected ? "true" : "false");
+        });
+      }
+
+      function refreshAllUI() {
+        let visibleCount = 0;
+
+        PLAYERS.forEach((_, idx) => {
+          syncCardUI(idx);
+          const card = rosterListEl.querySelector(`.player-card[data-index="${idx}"]`);
+          const isVisible = matchesCurrentFilter(idx);
+          card.hidden = !isVisible;
+          if (isVisible) visibleCount++;
+        });
+
+        updateCounters();
+        visibleCountLabel.textContent = `Showing ${visibleCount} of ${PLAYERS.length} players`;
+        emptyStateEl.hidden = visibleCount > 0;
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      /* ========================================================================
+         5. EVENT HANDLERS (DELEGATED FOR FAST MOBILE PERFORMANCE)
+         ======================================================================== */
+      rosterListEl.addEventListener("click", (event) => {
+        const btn = event.target.closest("button[data-action]");
+        if (!btn) return;
+
+        const card = btn.closest(".player-card");
+        if (!card) return;
+
+        const idx = Number(card.dataset.index);
+        const current = { ...getPlayerAssignment(idx) };
+        const action = btn.dataset.action;
+
+        if (action === "team") {
+          const chosenTeam = btn.dataset.team;
+          // Toggle off if tapped again, or set new team
+          current.team = current.team === chosenTeam ? "" : chosenTeam;
+        } else if (action === "position") {
+          const chosenPos = btn.dataset.pos;
+          // Toggle off if tapped again, or set new position
+          current.position = current.position === chosenPos ? "" : chosenPos;
+        } else if (action === "clear") {
+          current.team = "";
+          current.position = "";
+        }
+
+        if (!current.team && !current.position) {
+          delete state.assignments[idx];
+        } else {
+          state.assignments[idx] = current;
+        }
+
+        saveState();
+        syncCardUI(idx);
+        updateCounters();
+
+        // Re-evaluate visibility if currently filtered by Unassigned / Team A / Team B
+        if (state.filter !== "all") {
+          refreshAllUI();
+        }
+      });
+
+      coachNameInput.addEventListener("input", () => {
+        state.coachName = coachNameInput.value;
+        saveState();
+      });
+
+      filterButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.filter = btn.dataset.filter;
+          filterButtons.forEach(b => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+          refreshAllUI();
+        });
+      });
+
+      searchInput.addEventListener("input", () => {
+        state.search = searchInput.value;
+        refreshAllUI();
+      });
+
+      /* ========================================================================
+         6. EXPORT: WHATSAPP / EMAIL SUMMARY COPY
+         ======================================================================== */
+      function buildFormattedSummary() {
+        const coachLabel = state.coachName.trim() || "Unspecified Coach";
+        const lines = [];
+
+        lines.push(`⚽ SQUAD & POSITION SELECTIONS`);
+        lines.push(`Coach: ${coachLabel}`);
+        lines.push(`Date: ${new Date().toLocaleDateString("en-IE", { day: "numeric", month: "short", year: "numeric" })}`);
+        lines.push("");
+
+        ["Team A", "Team B"].forEach(teamName => {
+          const teamPlayers = [];
+          PLAYERS.forEach((name, idx) => {
+            const a = getPlayerAssignment(idx);
+            if (a.team === teamName) {
+              teamPlayers.push({ name, position: a.position || "Position TBC" });
+            }
+          });
+
+          lines.push(`==============================`);
+          lines.push(`${teamName.toUpperCase()} (${teamPlayers.length} players)`);
+          lines.push(`==============================`);
+
+          if (teamPlayers.length === 0) {
+            lines.push(`• No players assigned`);
+          } else {
+            const positionOrder = [...POSITIONS, "Position TBC"];
+            positionOrder.forEach(pos => {
+              const matching = teamPlayers.filter(p => p.position === pos);
+              if (matching.length > 0) {
+                lines.push(`${pos} (${matching.length}):`);
+                matching.forEach(p => {
+                  lines.push(`  - ${p.name}`);
+                });
+              }
+            });
+          }
+          lines.push("");
+        });
+
+        // List any players given a position without a team yet
+        const posOnly = [];
+        const unassigned = [];
+        PLAYERS.forEach((name, idx) => {
+          const a = getPlayerAssignment(idx);
+          if (!a.team && a.position) {
+            posOnly.push(`${name} (${a.position})`);
+          } else if (!a.team && !a.position) {
+            unassigned.push(name);
+          }
+        });
+
+        if (posOnly.length > 0) {
+          lines.push(`POSITION SELECTED (TEAM TBC) (${posOnly.length}):`);
+          posOnly.forEach(entry => lines.push(`  - ${entry}`));
+          lines.push("");
+        }
+
+        lines.push(`UNASSIGNED (${unassigned.length}):`);
+        if (unassigned.length === 0) {
+          lines.push(`  None — all 50 players assigned!`);
+        } else {
+          lines.push(`  ${unassigned.join(", ")}`);
+        }
+
+        return lines.join("\n");
+      }
+
+      document.getElementById("btn-copy-summary").addEventListener("click", () => {
+        const text = buildFormattedSummary();
+        const fallbackArea = document.getElementById("clipboard-fallback");
+        fallbackArea.value = text;
+        fallbackArea.select();
+        fallbackArea.setSelectionRange(0, text.length);
+
+        let copied = false;
+        try {
+          copied = document.execCommand("copy");
+        } catch (err) {
+          copied = false;
+        }
+
+        if (copied) {
+          showToast("✓ Summary copied! Ready to paste into WhatsApp or Email.");
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => showToast("✓ Summary copied! Ready to paste into WhatsApp or Email."))
+            .catch(() => showToast("Could not auto-copy. Please use Download CSV instead."));
+        } else {
+          showToast("Could not auto-copy. Please use Download CSV instead.");
+        }
+      });
+
+      /* ========================================================================
+         7. EXPORT: DOWNLOAD CSV FOR SPREADSHEET MERGING
+         ======================================================================== */
+      function csvEscape(value) {
+        const str = String(value ?? "");
+        if (/[",\n\r]/.test(str)) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }
+
+      document.getElementById("btn-download-csv").addEventListener("click", () => {
+        const coachLabel = state.coachName.trim() || "Unspecified Coach";
+        const rows = [
+          ["Coach Name", "Player Name", "Team", "Position"]
+        ];
+
+        PLAYERS.forEach((name, idx) => {
+          const a = getPlayerAssignment(idx);
+          rows.push([
+            coachLabel,
+            name,
+            a.team || "Unassigned",
+            a.position || "Unassigned"
+          ]);
+        });
+
+        const csvContent = "\uFEFF" + rows.map(r => r.map(csvEscape).join(",")).join("\r\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        const safeCoachSlug = coachLabel
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") || "coach";
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `squad-selections-${safeCoachSlug}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast(`✓ Downloaded squad-selections-${safeCoachSlug}.csv`);
+      });
+
+      /* ========================================================================
+         8. RESET ALL WITH ACCESSIBLE CONFIRMATION DIALOG
+         ======================================================================== */
+      let lastFocusedBeforeModal = null;
+
+      document.getElementById("btn-reset-all").addEventListener("click", () => {
+        lastFocusedBeforeModal = document.activeElement;
+        resetModal.classList.add("open");
+        btnCancelReset.focus();
+      });
+
+      function closeResetModal() {
+        resetModal.classList.remove("open");
+        if (lastFocusedBeforeModal) {
+          lastFocusedBeforeModal.focus();
+        }
+      }
+
+      btnCancelReset.addEventListener("click", closeResetModal);
+
+      resetModal.addEventListener("click", (e) => {
+        if (e.target === resetModal) {
+          closeResetModal();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && resetModal.classList.contains("open")) {
+          closeResetModal();
+        }
+      });
+
+      btnConfirmReset.addEventListener("click", () => {
+        state.assignments = {};
+        saveState();
+        refreshAllUI();
+        closeResetModal();
+        showToast("All player assignments have been reset.");
+      });
+
+      /* ========================================================================
+         9. INITIALIZE APP
+         ======================================================================== */
+      loadState();
+      coachNameInput.value = state.coachName;
+      buildRosterDOM();
+      refreshAllUI();
+    })();
+  </script>
+</body>
+</html>
